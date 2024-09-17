@@ -1,0 +1,14 @@
+{
+  "name": "devtinder-backend",
+  "version": "1.0.0",
+  "description": "like an tinder app where developers connect with each other.",
+  "main": "index.js",
+  "scripts": {
+    "start":"nodemon src/app.js"
+  },
+  "author": "shanmuga priya",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}
