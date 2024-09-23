@@ -2,19 +2,27 @@ const express = require("express");
 const connectDB = require("./config/db");
 const app = express();
 const User = require("./models/userModel");
+const bcrypt = require("bcrypt");
+const { validateSignUp } = require("./utils/validation");
 
 //built-in middleware to convert json to js obj
 app.use(express.json());
 
-app.post("/user", async (req, res) => {
-  const { firstName, lastName, email, password, age } = req.body;
-
+app.post("/signup", async (req, res) => {
   try {
     //API LEVEL VALIDATION
-    if (!firstName || !lastName || !email || !password || !age) {
-      throw new Error("missing required fields");
-    }
-    const user = new User(req.body);
+    validateSignUp(req);
+
+    const { firstName, lastName, email, password } = req.body;
+    //pASSWORD HASH
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = new User({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+    });
     await user.save();
     res.send("user created successfully");
   } catch (err) {

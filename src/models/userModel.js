@@ -60,7 +60,7 @@ const userSchema = new mongoose.Schema(
     },
     gender: {
       type: String,
-      required: [true, "Gender is required"],
+
       enum: {
         values: ["male", "female", "others"], // Valid enum values
         message: "Please select male, female, or others.",
@@ -68,7 +68,7 @@ const userSchema = new mongoose.Schema(
     },
     age: {
       type: Number,
-      required: true,
+
       min: [18, "You should be atleast 18 years old!"],
       max: [75, "Age should be below 75"],
     },
