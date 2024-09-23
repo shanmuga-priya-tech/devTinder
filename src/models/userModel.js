@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema(
           const emailRegex =
             /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
           // Test the email against the regex
-          if (emailRegex.test(email)) {
+          if (emailRegex.test(value)) {
             return true; // Email is valid
           } else {
             return false; // Email is invalid
@@ -40,13 +40,26 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      validate: {
+        validator: (value) => {
+          const passwordRegex =
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+          if (!passwordRegex.test(value)) {
+            return false;
+          } else {
+            return true;
+          }
+        },
+        message:
+          "Password must contain 8 charcters long with one uppercase,one lower case,one special character and one number.",
+      },
     },
     gender: {
       type: String,
       required: [true, "Gender is required"],
       enum: {
         values: ["male", "female", "others"], // Valid enum values
-        message: `${value} is not supported. Please select male, female, or others.`,
+        message: "Please select male, female, or others.",
       },
     },
     age: {

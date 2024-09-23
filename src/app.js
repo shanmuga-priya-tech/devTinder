@@ -13,7 +13,7 @@ app.post("/user", async (req, res) => {
     res.send("user created successfully");
   } catch (err) {
     //console.log(err);
-    res.status(400).send("failed to create user");
+    res.status(400).send("failed to create user" + err.message);
   }
 });
 
