@@ -68,6 +68,11 @@ const userSchema = new mongoose.Schema(
       min: [18, "You should be atleast 18 years old!"],
       max: [75, "Age should be below 75"],
     },
+    photoURL: {
+      type: String,
+      default:
+        "https://img.freepik.com/free-psd/3d-icon-social-media-app_23-2150049569.jpg?size=626&ext=jpg&ga=GA1.1.2117531757.1706517121&semt=ais_hybrid",
+    },
     about: {
       type: String,
       default: "This is the default about you can edit it if you wish.",

@@ -7,8 +7,14 @@ const User = require("./models/userModel");
 app.use(express.json());
 
 app.post("/user", async (req, res) => {
-  const user = new User(req.body);
+  const { firstName, lastName, email, password, age } = req.body;
+
   try {
+    //API LEVEL VALIDATION
+    if (!firstName || !lastName || !email || !password || !age) {
+      throw new Error("missing required fields");
+    }
+    const user = new User(req.body);
     await user.save();
     res.send("user created successfully");
   } catch (err) {
@@ -46,14 +52,31 @@ app.get("/users", async (req, res) => {
   }
 });
 
-app.patch("/user", async (req, res) => {
-  const userId = req.body.userId;
-  const data = req.body.data;
+app.patch("/user/:userId", async (req, res) => {
+  const userId = req.params?.userId;
+  const data = req.body;
   try {
+    //API LEVEL VALIDATION
+    const allowed_fields = ["skills", "about", "photoURL"];
+    //foe every key in the incomng data we are checking whether these fields are included in allowed field or not
+    const isUpdateAllowed = Object.keys(data).every((k) =>
+      allowed_fields.includes(k)
+    );
+
+    if (!isUpdateAllowed) {
+      throw new Error(
+        "You can update only particular fields(photoURL,about,skills)! "
+      );
+    }
+
+    if (data.skills.length > 10) {
+      throw new Error("Only 10 skills are allowed!");
+    }
+
     const user = await User.findByIdAndUpdate(userId, data);
     res.send("user updated successfully");
   } catch (err) {
-    res.status(400).send("something went wrong");
+    res.status(400).send("update failed:" + " " + err.message);
   }
 });
 
