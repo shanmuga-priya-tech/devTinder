@@ -73,7 +73,9 @@ app.patch("/user/:userId", async (req, res) => {
       throw new Error("Only 10 skills are allowed!");
     }
 
-    const user = await User.findByIdAndUpdate(userId, data);
+    const user = await User.findByIdAndUpdate(userId, data, {
+      runValidators: true,
+    });
     res.send("user updated successfully");
   } catch (err) {
     res.status(400).send("update failed:" + " " + err.message);

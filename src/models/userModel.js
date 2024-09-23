@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 
 const userSchema = new mongoose.Schema(
   {
@@ -23,14 +24,17 @@ const userSchema = new mongoose.Schema(
       trim: true,
       validate: {
         validator: (value) => {
-          const emailRegex =
-            /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-          // Test the email against the regex
-          if (emailRegex.test(value)) {
-            return true; // Email is valid
-          } else {
-            return false; // Email is invalid
+          if (!validator.isEmail(value)) {
+            return false;
           }
+          // const emailRegex =
+          //   /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+          // // Test the email against the regex
+          // if (emailRegex.test(value)) {
+          //   return true; // Email is valid
+          // } else {
+          //   return false; // Email is invalid
+          // }
         },
         message:
           "Email ID is not in correct format.It should be something like xyz@gmail.com",
@@ -72,6 +76,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       default:
         "https://img.freepik.com/free-psd/3d-icon-social-media-app_23-2150049569.jpg?size=626&ext=jpg&ga=GA1.1.2117531757.1706517121&semt=ais_hybrid",
+      validate: {
+        validator: (value) => {
+          if (!validator.isURL(value)) {
+            return false;
+          }
+        },
+        message: "Invalid image URL",
+      },
     },
     about: {
       type: String,
