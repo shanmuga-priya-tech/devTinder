@@ -3,6 +3,7 @@ const connectDB = require("./config/db");
 const app = express();
 const User = require("./models/userModel");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const { validateSignUp } = require("./utils/validation");
 
 //built-in middleware to convert json to js obj
@@ -40,13 +41,19 @@ app.post("/login", async (req, res) => {
     if (!user) {
       throw new Error("Incorrect email Id/password");
     }
-    //comparing the password
+    //comparing the password with hashed one
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
-    if (!isPasswordValid) {
-      throw new Error("Incorrect emailID/password");
-    } else {
+    if (isPasswordValid) {
+      //create a jwt token and send back with cookie along with response
+      const token = await jwt.sign({ _id: user._id }, process.env.JWTSECRETKEY);
+
+      //send it with cookie
+      res.cookie("token", token);
+
       res.send("user logged in successfully");
+    } else {
+      throw new Error("Incorrect emailID/password");
     }
   } catch (err) {
     res.status(400).send("ERROR: " + err.message);
@@ -68,7 +75,7 @@ app.get("/user", async (req, res) => {
   }
 });
 
-app.get("/users", async (req, res) => {
+app.get("/feed", async (req, res) => {
   try {
     const users = await User.find({});
     if (!users) {
