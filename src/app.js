@@ -5,7 +5,9 @@ const User = require("./models/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { validateSignUp } = require("./utils/validation");
+const { userAuth } = require("./middlewares/auth");
 const cookieParser = require("cookie-parser");
+const { connect } = require("mongoose");
 
 //built-in middleware to convert json to js obj
 app.use(express.json());
@@ -50,10 +52,14 @@ app.post("/login", async (req, res) => {
 
     if (isPasswordValid) {
       //create a jwt token and send back with cookie along with response
-      const token = await jwt.sign({ _id: user._id }, process.env.JWTSECRETKEY);
+      const token = await jwt.sign(
+        { _id: user._id },
+        process.env.JWTSECRETKEY,
+        { expiresIn: process.env.JWTEXPIRY }
+      );
 
       //send it with cookie
-      res.cookie("token", token);
+      res.cookie("token", token, { expiry: process.env.COOKIEEXPIRY });
 
       res.send("user logged in successfully");
     } else {
@@ -64,94 +70,24 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/profile", async (req, res) => {
+app.get("/profile", userAuth, async (req, res) => {
   try {
-    //getting the incoming cookie
-    const cookies = req.cookies;
-
-    //accessing the token  from that cookie
-    const { token } = cookies;
-    if (!token) {
-      throw new Error("please login to get access");
-    }
-
-    //validating the token
-    const decodedToken = await jwt.verify(token, process.env.JWTSECRETKEY);
-
-    const { _id } = decodedToken;
-
-    const user = await User.findById(_id);
-    if (!user) {
-      throw new Error("user not found");
-    }
+    //getting the user from auth middleware
+    const user = req.user;
     res.send(user);
   } catch (err) {
     res.status(400).send("ERROR: " + err.message);
   }
 });
 
-app.get("/feed", async (req, res) => {
-  try {
-    const users = await User.find({});
-    if (!users) {
-      res.status(404).send("users not found");
-    } else {
-      res.send(users);
-    }
-  } catch (err) {
-    //console.log(err);
-    res.status(400).send("something went wrong");
-  }
-});
-
-app.patch("/user/:userId", async (req, res) => {
-  const userId = req.params?.userId;
-  const data = req.body;
-  try {
-    //API LEVEL VALIDATION
-    const allowed_fields = ["skills", "about", "photoURL"];
-    //foe every key in the incomng data we are checking whether these fields are included in allowed field or not
-    const isUpdateAllowed = Object.keys(data).every((k) =>
-      allowed_fields.includes(k)
-    );
-
-    if (!isUpdateAllowed) {
-      throw new Error(
-        "You can update only particular fields(photoURL,about,skills)! "
-      );
-    }
-
-    if (data.skills.length > 10) {
-      throw new Error("Only 10 skills are allowed!");
-    }
-
-    const user = await User.findByIdAndUpdate(userId, data, {
-      runValidators: true,
-    });
-    res.send("user updated successfully");
-  } catch (err) {
-    res.status(400).send("update failed:" + " " + err.message);
-  }
-});
-
-app.delete("/user", async (req, res) => {
-  const userId = req.body.userId;
-
-  try {
-    const user = await User.findByIdAndDelete(userId);
-    res.send("user deleted successfully");
-  } catch (err) {
-    res.status(400).send("something went wrong");
-  }
-});
-
 connectDB()
   .then(() => {
-    console.log("DB connection successfull...🥳");
+    console.log("DB connected successfully");
+    //start the server
     app.listen(7777, () => {
-      console.log("server running on 7777...🥳");
+      console.log(`Server is running on port ${7777}`);
     });
   })
   .catch((err) => {
-    console.log("error while connecting DB", err);
+    console.log(err);
   });
