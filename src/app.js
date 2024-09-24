@@ -5,9 +5,13 @@ const User = require("./models/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { validateSignUp } = require("./utils/validation");
+const cookieParser = require("cookie-parser");
 
 //built-in middleware to convert json to js obj
 app.use(express.json());
+
+//built-in middleware to parse cookies
+app.use(cookieParser());
 
 app.post("/signup", async (req, res) => {
   try {
@@ -60,18 +64,29 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/user", async (req, res) => {
-  const email = req.body.email;
+app.get("/profile", async (req, res) => {
   try {
-    const user = await User.findOne({ email: email });
-    if (!user) {
-      res.status(404).send("user not found");
-    } else {
-      res.send(user);
+    //getting the incoming cookie
+    const cookies = req.cookies;
+
+    //accessing the token  from that cookie
+    const { token } = cookies;
+    if (!token) {
+      throw new Error("please login to get access");
     }
+
+    //validating the token
+    const decodedToken = await jwt.verify(token, process.env.JWTSECRETKEY);
+
+    const { _id } = decodedToken;
+
+    const user = await User.findById(_id);
+    if (!user) {
+      throw new Error("user not found");
+    }
+    res.send(user);
   } catch (err) {
-    //console.log(err);
-    res.status(400).send("something went wrong");
+    res.status(400).send("ERROR: " + err.message);
   }
 });
 
