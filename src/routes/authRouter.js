@@ -63,4 +63,56 @@ authRouter.post("/logout", (req, res) => {
   res.send("logged out successfully");
 });
 
+//dummy forget password implementation without email
+authRouter.patch("/forgetPassword", async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+    //finding user based on email
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      throw new Error("user not found");
+    }
+
+    //compare the incoming password with the already existing hashed password
+    const isPasswordSame = await user.validPassword(newPassword, user.password);
+    if (isPasswordSame) {
+      throw new Error("New password is similar to the existing one!");
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({ message: "password updated successfully!", data: user });
+  } catch (err) {
+    res.status(400).send("ERROR: " + err.message);
+  }
+});
+
+//Actual implementation
+// authRouter.post("/forgetPassword", async (req, res) => {
+//   try {
+//     const email = req.body;
+//     //getting user based on email id
+//     const user = await User.findOne({ email: email });
+//     if (!user) {
+//       throw new Error("user not found");
+//     }
+//     //generating random reset token which expires in 10 mins
+//     const resetToken = crypto.randomBytes(32).toString("hex");
+//     const resetTokenExpiry = Date.now() + process.env.RESETTOKENEXPIRY;
+
+//     //save reset token and expiry time to db
+//     user.resetToken = resetToken;
+//     user.resetTokenExpiry = resetTokenExpiry;
+//     await user.save();
+
+//     //send the resetLink in email
+//     const resetEmailLink = `https://devTinder/reset-password/${resetToken}`;
+//     await sendPasswordResetLink(user.email, resetEmailLink);
+//   } catch (err) {
+//     res.status(400).send("ERROR: " + err.message);
+//   }
+// });
 module.exports = authRouter;
