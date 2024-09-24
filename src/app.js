@@ -2,12 +2,10 @@ const express = require("express");
 const connectDB = require("./config/db");
 const app = express();
 const User = require("./models/userModel");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+
 const { validateSignUp } = require("./utils/validation");
 const { userAuth } = require("./middlewares/auth");
 const cookieParser = require("cookie-parser");
-const { connect } = require("mongoose");
 
 //built-in middleware to convert json to js obj
 app.use(express.json());
@@ -48,16 +46,10 @@ app.post("/login", async (req, res) => {
       throw new Error("Incorrect email Id/password");
     }
     //comparing the password with hashed one
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await user.validPassword(password);
 
     if (isPasswordValid) {
-      //create a jwt token and send back with cookie along with response
-      const token = await jwt.sign(
-        { _id: user._id },
-        process.env.JWTSECRETKEY,
-        { expiresIn: process.env.JWTEXPIRY }
-      );
-
+      const token = await user.createJWTToken();
       //send it with cookie
       res.cookie("token", token, { expiry: process.env.COOKIEEXPIRY });
 
