@@ -7,6 +7,7 @@ const cookieParser = require("cookie-parser");
 const authRouter = require("./routes/authRouter");
 const profileRouter = require("./routes/profileRouter");
 const connectionReqRouter = require("./routes/connectinReqRouter");
+const userRouter = require("./routes/userRouter");
 
 //built-in middleware to convert json to js obj
 app.use(express.json());
@@ -18,6 +19,7 @@ app.use(cookieParser());
 app.use("/", authRouter);
 app.use("/profile", profileRouter);
 app.use("/request", connectionReqRouter);
+app.use("/user", userRouter);
 
 connectDB()
   .then(() => {

@@ -86,7 +86,7 @@ requestRouter.post("/review/:status/:requestId", userAuth, async (req, res) => {
     await connectionData.save();
     res.json({
       message: `Connection request ${status} `,
-      connectionData,
+      data: connectionData,
     });
   } catch (err) {
     res.status(400).send("ERROR: " + err.message);
