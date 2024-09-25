@@ -1,6 +1,7 @@
 const express = require("express");
 const { userAuth } = require("../middlewares/auth");
 const ConnectionReq = require("../models/connectionRequestModel");
+const User = require("../models/userModel");
 const userRouter = express.Router();
 
 const dataRequired = [
@@ -75,6 +76,42 @@ userRouter.get("/connections", userAuth, async (req, res) => {
       message: "Connections fetched successfully!",
       data,
     });
+  } catch (err) {
+    res.status(400).send("ERROR: " + err.message);
+  }
+});
+
+userRouter.get("/feed", userAuth, async (req, res) => {
+  try {
+    const loggedInUser = req.user;
+
+    //user can see all the users card expect
+    //1)his own card
+    //2)his connections card
+    //3)whom he sent req[intrested ]
+    //4)whom he ignored & rejected
+
+    //find all the connection req where the current user in (send+recieved and in any status)
+    const connectionReqList = await ConnectionReq.find({
+      $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
+    }).select("fromUserId toUserId");
+
+    //to filter out the current user in every req in connectionReqList recieved and to have only unique users
+    const hiddenUsersFromFeed = new Set();
+    connectionReqList.forEach((req) => {
+      hiddenUsersFromFeed.add(req.fromUserId.toString());
+      hiddenUsersFromFeed.add(req.toUserId.toString());
+    });
+
+    //filtering out the user whois not in hidden list and the currently logged in user
+    const data = await User.find({
+      $and: [
+        { _id: { $nin: Array.from(hiddenUsersFromFeed) } }, //converting set to  array
+        { _id: { $ne: loggedInUser._id } },
+      ],
+    }).select(dataRequired);
+
+    res.send(data);
   } catch (err) {
     res.status(400).send("ERROR: " + err.message);
   }
