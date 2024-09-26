@@ -6,7 +6,7 @@ const ConnectionReq = require("../models/connectionRequestModel");
 const requestRouter = express.Router();
 
 //api to send connection request
-requestRouter.post("/send/:status/:toUserId", userAuth, async (req, res) => {
+requestRouter.post("//:status/:toUserId", userAuth, async (req, res) => {
   try {
     const fromUserId = req.user._id;
     const toUserId = req.params.toUserId;
@@ -54,7 +54,7 @@ requestRouter.post("/send/:status/:toUserId", userAuth, async (req, res) => {
       data,
     });
   } catch (err) {
-    res.status(400).send("ERROR: " + err.message);
+    res.status(400).json({ message: "ERROR: " + err.message });
   }
 });
 
@@ -66,7 +66,7 @@ requestRouter.post("/review/:status/:requestId", userAuth, async (req, res) => {
     //validating the status
     const allowedStatus = ["accepted", "rejected"];
     if (!allowedStatus.includes(status)) {
-      return res.status(400).send({ message: "status not valid!" });
+      return res.status(400).json({ message: "status not valid!" });
     }
 
     //validating whether the requestId is crct & loggedin user is the toUser & status is interested
@@ -77,7 +77,7 @@ requestRouter.post("/review/:status/:requestId", userAuth, async (req, res) => {
     });
 
     if (!connectionData) {
-      return res.status(404).send({ message: "No connection request found!" });
+      return res.status(404).json({ message: "No connection request found!" });
     }
 
     //if successfull update the status to the current status either accepted or rejected
@@ -89,7 +89,7 @@ requestRouter.post("/review/:status/:requestId", userAuth, async (req, res) => {
       data: connectionData,
     });
   } catch (err) {
-    res.status(400).send("ERROR: " + err.message);
+    res.status(400).json({ message: "ERROR: " + err.message });
   }
 });
 

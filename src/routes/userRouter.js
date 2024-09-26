@@ -25,7 +25,7 @@ userRouter.get("/requests/received", userAuth, async (req, res) => {
     }).populate("fromUserId", dataRequired);
 
     if (!connectionList) {
-      return res.status(404).send("No connections found!");
+      return res.status(404).json({ message: "No connections found!" });
     }
 
     res.json({
@@ -33,7 +33,7 @@ userRouter.get("/requests/received", userAuth, async (req, res) => {
       data: connectionList,
     });
   } catch (err) {
-    res.status(400).send("ERROR: " + err.message);
+    res.status(400).json({ message: "ERROR: " + err.message });
   }
 });
 
@@ -53,7 +53,7 @@ userRouter.get("/connections", userAuth, async (req, res) => {
       .populate("toUserId", dataRequired);
 
     if (!connectionList) {
-      return res.status(404).send("There is No connection!");
+      return res.status(404).json({ message: "There is No connection!" });
     }
 
     //checking whether the user is sender or not.
@@ -69,7 +69,7 @@ userRouter.get("/connections", userAuth, async (req, res) => {
     });
 
     if (data.length === 0) {
-      return res.status(404).send("NO connection found!");
+      return res.status(404).json({ message: "NO connection found!" });
     }
 
     res.json({
@@ -77,13 +77,19 @@ userRouter.get("/connections", userAuth, async (req, res) => {
       data,
     });
   } catch (err) {
-    res.status(400).send("ERROR: " + err.message);
+    res.status(400).json({ message: "ERROR: " + err.message });
   }
 });
 
 userRouter.get("/feed", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
+
+    //PAGINATION:
+    const page = parseInt(req.query.page) || 1;
+    let limit = parseInt(req.query.limit) || 10;
+    limit = limit > 30 ? 30 : limit;
+    const skip = (page - 1) * limit;
 
     //user can see all the users card expect
     //1)his own card
@@ -109,11 +115,17 @@ userRouter.get("/feed", userAuth, async (req, res) => {
         { _id: { $nin: Array.from(hiddenUsersFromFeed) } }, //converting set to  array
         { _id: { $ne: loggedInUser._id } },
       ],
-    }).select(dataRequired);
+    })
+      .select(dataRequired)
+      .skip(skip)
+      .limit(limit);
 
-    res.send(data);
+    if (data.length === 0) {
+      return res.status(400).json({ message: "No more data to fetch" });
+    }
+    res.json({ message: "data fetched successfully", data });
   } catch (err) {
-    res.status(400).send("ERROR: " + err.message);
+    res.status(400).json({ message: "ERROR: " + err.message });
   }
 });
 

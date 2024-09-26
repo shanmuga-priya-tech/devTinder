@@ -21,10 +21,10 @@ authRouter.post("/signup", async (req, res) => {
       password: hashedPassword,
     });
     await user.save();
-    res.send("user created successfully");
+    res.json({ message: "user created successfully" });
   } catch (err) {
     //console.log(err);
-    res.status(400).send("failed to create user" + err.message);
+    res.status(400).json({ message: "failed to create user" + err.message });
   }
 });
 
@@ -45,12 +45,12 @@ authRouter.post("/login", async (req, res) => {
       //send it with cookie
       res.cookie("token", token, { expiry: process.env.COOKIEEXPIRY });
 
-      res.send("user logged in successfully");
+      res.josn({ message: "user logged in successfully" });
     } else {
       throw new Error("Incorrect emailID/password");
     }
   } catch (err) {
-    res.status(400).send("ERROR: " + err.message);
+    res.status(400).json({ message: "ERROR: " + err.message });
   }
 });
 
@@ -60,7 +60,7 @@ authRouter.post("/logout", (req, res) => {
     expires: new Date(Date.now()),
   });
 
-  res.send("logged out successfully");
+  res.json({ message: "logged out successfully" });
 });
 
 //dummy forget password implementation without email
@@ -86,7 +86,7 @@ authRouter.patch("/forgetPassword", async (req, res) => {
 
     res.json({ message: "password updated successfully!", data: user });
   } catch (err) {
-    res.status(400).send("ERROR: " + err.message);
+    res.status(400).json({ message: "ERROR: " + err.message });
   }
 });
 
