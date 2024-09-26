@@ -21,7 +21,7 @@ authRouter.post("/signup", async (req, res) => {
       password: hashedPassword,
     });
     await user.save();
-    res.json({ message: "user created successfully" });
+    res.status(200).json({ message: "user created successfully" });
   } catch (err) {
     //console.log(err);
     res.status(400).json({ message: "failed to create user" + err.message });
@@ -45,7 +45,7 @@ authRouter.post("/login", async (req, res) => {
       //send it with cookie
       res.cookie("token", token, { expiry: process.env.COOKIEEXPIRY });
 
-      res.josn({ message: "user logged in successfully" });
+      res.json({ message: "user logged in successfully", data: user });
     } else {
       throw new Error("Incorrect emailID/password");
     }

@@ -2,12 +2,21 @@ const express = require("express");
 const connectDB = require("./config/db");
 const app = express();
 const cookieParser = require("cookie-parser");
+const cors = require("cors");
 
 //importing routers
 const authRouter = require("./routes/authRouter");
 const profileRouter = require("./routes/profileRouter");
 const connectionReqRouter = require("./routes/connectinReqRouter");
 const userRouter = require("./routes/userRouter");
+
+//cors middleware to allow other IP address and setting thedomains which we want to allow
+app.use(
+  cors({
+    origin: "http://localhost:5173", //frontend domain
+    credentials: true, //allow to set cookie on http req also
+  })
+);
 
 //built-in middleware to convert json to js obj
 app.use(express.json());
