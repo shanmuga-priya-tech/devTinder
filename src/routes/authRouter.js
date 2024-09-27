@@ -32,25 +32,34 @@ authRouter.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    //Getting user doc based on email
-    const user = await User.findOne({ email: email });
+    // Getting user doc based on email
+    const user = await User.findOne({ email });
     if (!user) {
-      throw new Error("Incorrect email Id/password");
+      throw new Error("Incorrect Email Id/Password");
     }
-    //comparing the password with hashed one
+
+    // Comparing the password with the hashed one
     const isPasswordValid = await user.validPassword(password);
-
-    if (isPasswordValid) {
-      const token = await user.createJWTToken();
-      //send it with cookie
-      res.cookie("token", token, { expiry: process.env.COOKIEEXPIRY });
-
-      res.json({ message: "user logged in successfully", data: user });
-    } else {
-      throw new Error("Incorrect emailID/password");
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Invalid email or password" });
     }
+
+    // Create JWT token
+    const token = await user.createJWTToken();
+
+    // Send it with a cookie
+    res.cookie("token", token, {
+      httpOnly: true, // Ensures the cookie is only accessible via HTTP(S), not JS
+      sameSite: "None", // Required for cross-origin requests
+      expiry: new Date(Date.now() + process.env.COOKIEEXPIRY),
+    });
+
+    // Send success response
+    return res
+      .status(200)
+      .json({ message: "User logged in successfully", data: user });
   } catch (err) {
-    res.status(400).json({ message: "ERROR: " + err.message });
+    return res.status(400).json({ message: err.message });
   }
 });
 
@@ -86,7 +95,7 @@ authRouter.patch("/forgetPassword", async (req, res) => {
 
     res.json({ message: "password updated successfully!", data: user });
   } catch (err) {
-    res.status(400).json({ message: "ERROR: " + err.message });
+    res.status(400).json({ message: err.message });
   }
 });
 
