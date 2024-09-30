@@ -68,10 +68,6 @@ userRouter.get("/connections", userAuth, async (req, res) => {
       return connection.fromUserId;
     });
 
-    if (data.length === 0) {
-      return res.status(404).json({ message: "NO connection found!" });
-    }
-
     res.json({
       message: "Connections fetched successfully!",
       data,
