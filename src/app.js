@@ -13,8 +13,8 @@ const userRouter = require("./routes/userRouter");
 //cors middleware to allow other IP address and setting thedomains which we want to allow
 app.use(
   cors({
-    origin: "http://localhost:5173/", //frontend domain
-    credentials: true, //allow to set cookie on http req also
+    origin: "http://localhost:5173",
+    credentials: true,
   })
 );
 

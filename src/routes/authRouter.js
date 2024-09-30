@@ -49,9 +49,7 @@ authRouter.post("/login", async (req, res) => {
 
     // Send it with a cookie
     res.cookie("token", token, {
-      httpOnly: true, // Ensures the cookie is only accessible via HTTP(S), not JS
-      sameSite: "None", // Required for cross-origin requests
-      expiry: new Date(Date.now() + process.env.COOKIEEXPIRY),
+      expires: new Date(Date.now() + 1 * 3600000),
     });
 
     // Send success response

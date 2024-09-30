@@ -6,7 +6,7 @@ const ConnectionReq = require("../models/connectionRequestModel");
 const requestRouter = express.Router();
 
 //api to send connection request
-requestRouter.post("//:status/:toUserId", userAuth, async (req, res) => {
+requestRouter.post("/send/:status/:toUserId", userAuth, async (req, res) => {
   try {
     const fromUserId = req.user._id;
     const toUserId = req.params.toUserId;
