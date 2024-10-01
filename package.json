@@ -4,7 +4,8 @@
   "description": "like an tinder app where developers connect with each other.",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/app.js"
+    "dev": "nodemon src/app.js",
+    "start":"node src/app.js"
   },
   "author": "shanmuga priya",
   "license": "ISC",
