@@ -28,6 +28,7 @@ authRouter.post("/signup", async (req, res) => {
     res.cookie("token", token, {
       secure: process.env.NODE_ENV === "production", // Use true in production
       sameSite: "None", // Needed for cross-origin
+      domain: process.env.FRONTEND_URL,
       expires: new Date(Date.now() + 1 * 360000),
     });
 
@@ -62,6 +63,7 @@ authRouter.post("/login", async (req, res) => {
     res.cookie("token", token, {
       secure: process.env.NODE_ENV === "production", // Use true in production
       sameSite: "None", // Needed for cross-origin
+      domain: process.env.FRONTEND_URL,
       expires: new Date(Date.now() + 1 * 3600000),
     });
 
