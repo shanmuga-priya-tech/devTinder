@@ -9,7 +9,6 @@ const dataRequired = [
   "lastName",
   "photoURL",
   "about",
-  "skills",
   "age",
   "gender",
 ];
@@ -116,9 +115,6 @@ userRouter.get("/feed", userAuth, async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-    if (data.length === 0) {
-      return res.status(400).json({ message: "No more data to fetch" });
-    }
     res.json({ message: "data fetched successfully", data });
   } catch (err) {
     res.status(400).json({ message: "ERROR: " + err.message });

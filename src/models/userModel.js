@@ -48,12 +48,8 @@ const userSchema = new mongoose.Schema(
       trim: true,
       validate: {
         validator: (value) => {
-          const passwordRegex =
-            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-          if (!passwordRegex.test(value)) {
+          if (!validator.isStrongPassword(value)) {
             return false;
-          } else {
-            return true;
           }
         },
         message:
@@ -91,9 +87,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "This is the default about you can edit it if you wish.",
       maxLength: [200, "about can contain 200 characters"],
-    },
-    skills: {
-      type: [String],
     },
   },
   {
