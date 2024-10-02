@@ -79,6 +79,9 @@ authRouter.post("/login", async (req, res) => {
 authRouter.post("/logout", (req, res) => {
   //expire the cookie
   res.cookie("token", null, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
     expires: new Date(Date.now()),
   });
 
