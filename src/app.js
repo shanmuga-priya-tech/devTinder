@@ -13,8 +13,8 @@ const userRouter = require("./routes/userRouter");
 //cors middleware to allow other IP address and setting thedomains which we want to allow
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
-    credentials: true,
+    origin: process.env.FRONTEND_URL, // Your frontend Netlify URL
+    credentials: true, // Required to allow sending cookies
   })
 );
 
