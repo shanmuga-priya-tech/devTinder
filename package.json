@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon src/app.js",
-    "start":"node src/app.js"
+    "start": "node src/app.js"
   },
   "author": "shanmuga priya",
   "license": "ISC",
@@ -17,6 +17,7 @@
     "express": "^4.21.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.6.3",
+    "nodemailer": "^6.9.16",
     "validator": "^13.12.0"
   }
 }

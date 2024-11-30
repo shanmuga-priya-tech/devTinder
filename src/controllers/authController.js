@@ -1,5 +1,5 @@
 const User = require("../models/userModel");
-const { validateSignUp } = require("../utils/validation");
+const { validateSignUp, validateEmail } = require("../utils/validation");
 const bcrypt = require("bcrypt");
 
 exports.signup = async (req, res) => {
@@ -83,4 +83,39 @@ exports.logout = (req, res) => {
   });
 
   res.json({ message: "logged out successfully" });
+};
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    //check whether the email is present or not
+    const { email } = req.body;
+    if (!email) {
+      throw new Error("please provide a valid Email.");
+    }
+
+    //validate email
+    validateEmail(req);
+
+    //find user based on provided email
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      throw new Error("No user Found with this Email ID !");
+    }
+
+    //create a resetUrl with resetToken
+    const resetToken = user.createResetToken();
+
+    const resetUrl = `${req.protocol}://${req.get(
+      "host"
+    )}/resetpassword/${resetToken}`;
+
+    //send it to user's email
+  } catch (err) {
+    return res.status(400).json({ message: err.message });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  try {
+  } catch (err) {}
 };

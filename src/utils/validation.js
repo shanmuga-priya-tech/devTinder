@@ -32,7 +32,16 @@ const validateEditProfile = (req) => {
   return isEditAllowed;
 };
 
+const validateEmail = (req) => {
+  const { email } = req.body;
+
+  if (!email || !validator.isEmail(email)) {
+    throw new Error("Email is not valid");
+  }
+};
+
 module.exports = {
   validateSignUp,
   validateEditProfile,
+  validateEmail,
 };

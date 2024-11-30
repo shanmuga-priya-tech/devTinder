@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 
 const userSchema = new mongoose.Schema(
   {
@@ -29,14 +30,6 @@ const userSchema = new mongoose.Schema(
           if (!validator.isEmail(value)) {
             return false;
           }
-          // const emailRegex =
-          //   /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-          // // Test the email against the regex
-          // if (emailRegex.test(value)) {
-          //   return true; // Email is valid
-          // } else {
-          //   return false; // Email is invalid
-          // }
         },
         message:
           "Email ID is not in correct format.It should be something like xyz@gmail.com",
@@ -56,6 +49,7 @@ const userSchema = new mongoose.Schema(
           "Password must contain 8 charcters long with one uppercase,one lower case,one special character and one number.",
       },
     },
+
     gender: {
       type: String,
 
@@ -88,12 +82,18 @@ const userSchema = new mongoose.Schema(
       default: "This is the default about you can edit it if you wish.",
       maxLength: [200, "about can contain 200 characters"],
     },
+    passwordChangedAt: Date,
+    resetToken: String,
+    resetTokenExpires: Date,
   },
   {
     timestamps: true,
   }
 );
 
+//schema methods
+
+//creating jwt token
 userSchema.methods.createJWTToken = async function () {
   //create a jwt token and send back with cookie along with response
   const token = await jwt.sign({ _id: this._id }, process.env.JWTSECRETKEY, {
@@ -103,9 +103,25 @@ userSchema.methods.createJWTToken = async function () {
   return token;
 };
 
+//validating pwd
 userSchema.methods.validPassword = async function (incomingPassword) {
   const isPasswordValid = await bcrypt.compare(incomingPassword, this.password);
   return isPasswordValid;
+};
+
+//creating reset token for forgot password
+userSchema.methods.createResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString("hex");
+
+  //encrypted version for db
+  this.resetToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  this.resetTokenExpires = Date.now() * 10 * 60 * 1000; //10 mins
+
+  return resetToken;
 };
 
 const User = mongoose.model("User", userSchema);
