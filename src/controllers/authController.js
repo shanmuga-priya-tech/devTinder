@@ -1,4 +1,5 @@
 const User = require("../models/userModel");
+const sendEmail = require("../utils/email");
 const { validateSignUp, validateEmail } = require("../utils/validation");
 const bcrypt = require("bcrypt");
 
@@ -104,12 +105,21 @@ exports.forgotPassword = async (req, res) => {
 
     //create a resetUrl with resetToken
     const resetToken = user.createResetToken();
+    await user.save({ validateBeforeSave: false });
 
     const resetUrl = `${req.protocol}://${req.get(
       "host"
     )}/resetpassword/${resetToken}`;
 
+    const subject = "Password Reset Token(valid for only 10 minutes)";
+
+    const message = `You can reset your password by clicking this Link ${resetUrl}.
+    Remember password please ignore this email!`;
+
     //send it to user's email
+    await sendEmail({ email: user.email, subject: subject, message: message });
+
+    res.status(200).json({ message: "Email sent succesfully" });
   } catch (err) {
     return res.status(400).json({ message: err.message });
   }

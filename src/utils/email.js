@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer");
 
-const sendMail = async (options) => {
+const sendEmail = async (options) => {
   //create transport
   const transporter = nodemailer.createTransport({
     //get this details from mailtrap
@@ -14,7 +14,7 @@ const sendMail = async (options) => {
 
   //create email options
   const emailOptions = {
-    from: process.env.ADMIN_EMAIL,
+    from: `Shan from <${process.env.ADMIN_EMAIL}>`,
     to: options.email,
     subject: options.subject,
     text: options.message,
@@ -24,4 +24,4 @@ const sendMail = async (options) => {
   await transporter.sendMail(emailOptions);
 };
 
-module.exports = sendMail;
+module.exports = sendEmail;

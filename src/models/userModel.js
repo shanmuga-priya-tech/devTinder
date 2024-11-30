@@ -83,8 +83,8 @@ const userSchema = new mongoose.Schema(
       maxLength: [200, "about can contain 200 characters"],
     },
     passwordChangedAt: Date,
-    resetToken: String,
-    resetTokenExpires: Date,
+    passwordResetToken: String,
+    passwordResetTokenExpires: Date,
   },
   {
     timestamps: true,
@@ -114,12 +114,12 @@ userSchema.methods.createResetToken = function () {
   const resetToken = crypto.randomBytes(32).toString("hex");
 
   //encrypted version for db
-  this.resetToken = crypto
+  this.passwordResetToken = crypto
     .createHash("sha256")
     .update(resetToken)
     .digest("hex");
 
-  this.resetTokenExpires = Date.now() * 10 * 60 * 1000; //10 mins
+  this.passwordResetTokenExpires = Date.now() + 10 * 60 * 1000; //10 mins
 
   return resetToken;
 };
