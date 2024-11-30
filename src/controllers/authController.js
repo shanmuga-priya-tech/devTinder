@@ -145,8 +145,32 @@ exports.resetPassword = async (req, res) => {
     if (!user) {
       throw new Error("Invalid User or Token!");
     }
-    res.status(200).json({ user });
-    console.log(user);
+
+    //validating the incoming password
+    const { password, passwordConfirm } = req.body;
+    if (password !== passwordConfirm) {
+      throw new Error("password mismatch!");
+    }
+    //updatinng the user doc with new password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+    user.passwordResetToken = undefined;
+    user.passwordResetTokenExpires = undefined;
+    await user.save();
+
+    //log the user in by sending jwt
+    // Create JWT token
+    const token = await user.createJWTToken();
+
+    // Send it with a cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None", // Needed for cross-origin
+      expires: new Date(Date.now() + 1 * 3600000),
+    });
+
+    res.status(200).json({ message: "password changed successfully!" });
   } catch (err) {
     return res.status(400).json({ message: err.message });
   }

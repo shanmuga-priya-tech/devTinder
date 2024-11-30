@@ -82,7 +82,6 @@ const userSchema = new mongoose.Schema(
       default: "This is the default about you can edit it if you wish.",
       maxLength: [200, "about can contain 200 characters"],
     },
-    passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetTokenExpires: Date,
   },
