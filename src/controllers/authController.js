@@ -2,6 +2,7 @@ const User = require("../models/userModel");
 const sendEmail = require("../utils/email");
 const { validateSignUp, validateEmail } = require("../utils/validation");
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 
 exports.signup = async (req, res) => {
   try {
@@ -87,6 +88,7 @@ exports.logout = (req, res) => {
 };
 
 exports.forgotPassword = async (req, res) => {
+  let user;
   try {
     //check whether the email is present or not
     const { email } = req.body;
@@ -98,12 +100,12 @@ exports.forgotPassword = async (req, res) => {
     validateEmail(req);
 
     //find user based on provided email
-    const user = await User.findOne({ email: email });
+    user = await User.findOne({ email: email });
     if (!user) {
       throw new Error("No user Found with this Email ID !");
     }
 
-    //create a resetUrl with resetToken
+    //create a resetUrl with resetToken from method created on userschema
     const resetToken = user.createResetToken();
     await user.save({ validateBeforeSave: false });
 
@@ -121,11 +123,31 @@ exports.forgotPassword = async (req, res) => {
 
     res.status(200).json({ message: "Email sent succesfully" });
   } catch (err) {
+    user.passwordResetToken = undefined;
+    user.passwordResetTokenExpires = undefined;
+    await user.save({ validateBeforeSave: false });
     return res.status(400).json({ message: err.message });
   }
 };
 
 exports.resetPassword = async (req, res) => {
   try {
-  } catch (err) {}
+    const hashedResetToken = crypto
+      .createHash("sha256")
+      .update(req.params.resetToken)
+      .digest("hex");
+
+    //getting user based on resetToken and check for token expiry
+    const user = await User.findOne({
+      passwordResetToken: hashedResetToken,
+      passwordResetTokenExpires: { $gte: Date.now() },
+    });
+    if (!user) {
+      throw new Error("Invalid User or Token!");
+    }
+    res.status(200).json({ user });
+    console.log(user);
+  } catch (err) {
+    return res.status(400).json({ message: err.message });
+  }
 };
