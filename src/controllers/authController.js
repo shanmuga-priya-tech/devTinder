@@ -109,14 +109,24 @@ exports.forgotPassword = async (req, res) => {
     const resetToken = user.createResetToken();
     await user.save({ validateBeforeSave: false });
 
-    const resetUrl = `${req.protocol}://${req.get(
-      "host"
-    )}/resetpassword/${resetToken}`;
+    const resetUrl = `${process.env.FRONTEND_URL}/resetpassword/${resetToken}`;
 
     const subject = "Password Reset Token(valid for only 10 minutes)";
 
-    const message = `You can reset your password by clicking this Link ${resetUrl}.
-    Remember password please ignore this email!`;
+    const message = `
+    <p>You can reset your password by clicking the button below:</p>
+    <a href="http://localhost:5173/resetpassword/${resetToken}" style="
+        display: inline-block;
+        background-color: #007BFF;
+        color: white;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: bold;
+    ">Reset Password</a>
+    <p>If you remember your password, please ignore this email.</p>
+  `;
 
     //send it to user's email
     await sendEmail({ email: user.email, subject: subject, message: message });
@@ -132,6 +142,7 @@ exports.forgotPassword = async (req, res) => {
 
 exports.resetPassword = async (req, res) => {
   try {
+    console.log(req.params.resetToken);
     const hashedResetToken = crypto
       .createHash("sha256")
       .update(req.params.resetToken)
@@ -142,6 +153,7 @@ exports.resetPassword = async (req, res) => {
       passwordResetToken: hashedResetToken,
       passwordResetTokenExpires: { $gte: Date.now() },
     });
+    console.log(user);
     if (!user) {
       throw new Error("Invalid User or Token!");
     }
