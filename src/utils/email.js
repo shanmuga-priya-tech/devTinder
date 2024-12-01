@@ -53,7 +53,6 @@ const sendEmail = async (options) => {
   //create email options
   const emailOptions = {
     from: `Shan from <${process.env.ADMIN_EMAIL}>`,
-
     to: options.email,
     subject: options.subject,
     html: options.message,

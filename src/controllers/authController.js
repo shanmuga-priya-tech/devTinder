@@ -115,7 +115,7 @@ exports.forgotPassword = async (req, res) => {
 
     const message = `
     <p>You can reset your password by clicking the button below:</p>
-    <a href="http://localhost:5173/resetpassword/${resetToken}" style="
+    <a href=${process.env.FRONTEND_URL}/resetpassword/${resetToken} style="
         display: inline-block;
         background-color: #007BFF;
         color: white;
