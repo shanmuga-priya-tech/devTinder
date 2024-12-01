@@ -40,8 +40,25 @@ const validateEmail = (req) => {
   }
 };
 
+const validatePWD = (req) => {
+  const { password, passwordConfirm } = req.body;
+
+  if (
+    !password ||
+    !passwordConfirm ||
+    !validator.isStrongPassword(password) ||
+    !validator.isStrongPassword(passwordConfirm) ||
+    password !== passwordConfirm
+  ) {
+    throw new Error(
+      "password is Incorrect!password should contain minimum 8  characters with atleast one capital letter and one symbol and one number!"
+    );
+  }
+};
+
 module.exports = {
   validateSignUp,
   validateEditProfile,
   validateEmail,
+  validatePWD,
 };

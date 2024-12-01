@@ -1,6 +1,10 @@
 const User = require("../models/userModel");
 const sendEmail = require("../utils/email");
-const { validateSignUp, validateEmail } = require("../utils/validation");
+const {
+  validateSignUp,
+  validateEmail,
+  validatePWD,
+} = require("../utils/validation");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 
@@ -145,7 +149,6 @@ exports.forgotPassword = async (req, res) => {
 
 exports.resetPassword = async (req, res) => {
   try {
-    console.log(req.params.resetToken);
     const hashedResetToken = crypto
       .createHash("sha256")
       .update(req.params.resetToken)
@@ -156,21 +159,21 @@ exports.resetPassword = async (req, res) => {
       passwordResetToken: hashedResetToken,
       passwordResetTokenExpires: { $gte: Date.now() },
     });
-    console.log(user);
+
     if (!user) {
       throw new Error("Invalid User or Token!");
     }
 
     //validating the incoming password
-    const { password, passwordConfirm } = req.body;
-    if (password !== passwordConfirm) {
-      throw new Error("password mismatch!");
-    }
+    validatePWD(req);
+    const { password } = req.body;
+
     //updatinng the user doc with new password
     const hashedPassword = await bcrypt.hash(password, 10);
     user.password = hashedPassword;
     user.passwordResetToken = undefined;
     user.passwordResetTokenExpires = undefined;
+
     await user.save();
 
     //log the user in by sending jwt
@@ -187,6 +190,6 @@ exports.resetPassword = async (req, res) => {
 
     res.status(200).json({ message: "password changed successfully!" });
   } catch (err) {
-    return res.status(400).json({ message: err });
+    return res.status(400).json({ message: err.message });
   }
 };
