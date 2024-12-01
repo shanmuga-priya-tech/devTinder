@@ -133,9 +133,12 @@ exports.forgotPassword = async (req, res) => {
 
     res.status(200).json({ message: "Email sent succesfully" });
   } catch (err) {
-    user.passwordResetToken = undefined;
-    user.passwordResetTokenExpires = undefined;
-    await user.save({ validateBeforeSave: false });
+    if (user) {
+      // Ensure user exists before attempting to modify its properties
+      user.passwordResetToken = undefined;
+      user.passwordResetTokenExpires = undefined;
+      await user.save({ validateBeforeSave: false });
+    }
     return res.status(400).json({ message: err.message });
   }
 };
@@ -184,6 +187,6 @@ exports.resetPassword = async (req, res) => {
 
     res.status(200).json({ message: "password changed successfully!" });
   } catch (err) {
-    return res.status(400).json({ message: err.message });
+    return res.status(400).json({ message: err });
   }
 };
