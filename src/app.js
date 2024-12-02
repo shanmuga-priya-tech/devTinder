@@ -30,7 +30,14 @@ app.use("/profile", profileRouter);
 app.use("/request", connectionReqRouter);
 app.use("/user", userRouter);
 
-connectDB()
+//middleware to handle undefined routes
+app.all("*", (req, res, next) => {
+  res
+    .status(404)
+    .json({ message: `can't find ${req.originalUrl} on this server!` });
+});
+
+const server = connectDB()
   .then(() => {
     console.log("DB connected successfully");
     //start the server
@@ -41,3 +48,19 @@ connectDB()
   .catch((err) => {
     console.log(err);
   });
+
+//to handle any uncaught promise
+process.on("unhandledRejection", (err) => {
+  console.log(err.name, err.message);
+  server.close(() => {
+    process.exit(1);
+  });
+});
+
+//to handle any occurs in sync code
+process.on("uncaughtException", (err) => {
+  console.log(err.name, err.message);
+  server.close(() => {
+    process.exit(1);
+  });
+});
