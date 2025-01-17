@@ -1,4 +1,5 @@
 const express = require("express");
+const http = require("http");
 const connectDB = require("./config/db");
 const app = express();
 const cookieParser = require("cookie-parser");
@@ -9,6 +10,7 @@ const authRouter = require("./routes/authRouter");
 const profileRouter = require("./routes/profileRouter");
 const connectionReqRouter = require("./routes/connectinReqRouter");
 const userRouter = require("./routes/userRouter");
+const { createSocketConnection } = require("./utils/socket");
 
 //cors middleware to allow other IP address and setting thedomains which we want to allow
 app.use(
@@ -37,11 +39,15 @@ app.all("*", (req, res, next) => {
     .json({ message: `can't find ${req.originalUrl} on this server!` });
 });
 
-const server = connectDB()
+//creating server using http module for socket connection
+const server = http.createServer(app);
+createSocketConnection(server);
+
+const server1 = connectDB()
   .then(() => {
     console.log("DB connected successfully");
     //start the server
-    app.listen(process.env.PORT, () => {
+    server.listen(process.env.PORT, () => {
       console.log(`Server is running on port ${process.env.PORT}`);
     });
   })
@@ -52,7 +58,7 @@ const server = connectDB()
 //to handle any uncaught promise
 process.on("unhandledRejection", (err) => {
   console.log(err.name, err.message);
-  server.close(() => {
+  server1.close(() => {
     process.exit(1);
   });
 });
@@ -60,7 +66,7 @@ process.on("unhandledRejection", (err) => {
 //to handle any occurs in sync code
 process.on("uncaughtException", (err) => {
   console.log(err.name, err.message);
-  server.close(() => {
+  server1.close(() => {
     process.exit(1);
   });
 });
