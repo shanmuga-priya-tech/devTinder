@@ -22,11 +22,17 @@ const createSocketConnection = (server) => {
     //handle events
     socket.on("joinChat", ({ firstName, userId, receiverId }) => {
       const roomId = getSecretRoomId(userId, receiverId);
-      console.log(`${firstName} joined ${roomId}`);
+      //   console.log(`${firstName} joined ${roomId}`);
       socket.join(roomId);
     });
 
-    socket.on("sendMessage", () => {});
+    socket.on(
+      "sendMessage",
+      ({ firstName, profilepic, userId, receiverId, msg }) => {
+        const roomId = getSecretRoomId(userId, receiverId);
+        io.to(roomId).emit("messageRecieved", { firstName, profilepic, msg });
+      }
+    );
 
     socket.on("disconnect", () => {});
   });
