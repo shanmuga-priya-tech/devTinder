@@ -30,7 +30,7 @@ const createSocketConnection = (server) => {
       "sendMessage",
       ({ firstName, profilepic, userId, receiverId, msg }) => {
         const roomId = getSecretRoomId(userId, receiverId);
-        io.to(roomId).emit("messageRecieved", { firstName, profilepic, msg });
+        io.to(roomId).emit("messageReceived", { firstName, profilepic, msg });
       }
     );
 
