@@ -10,7 +10,7 @@ const authRouter = require("./routes/authRouter");
 const profileRouter = require("./routes/profileRouter");
 const connectionReqRouter = require("./routes/connectinReqRouter");
 const userRouter = require("./routes/userRouter");
-const { createSocketConnection } = require("./utils/socket");
+const createSocketConnection = require("./utils/socket");
 
 //cors middleware to allow other IP address and setting thedomains which we want to allow
 app.use(
